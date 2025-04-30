@@ -1,0 +1,5 @@
+# ninja log v6
+60	392	7676951850803682	CMakeFiles/busTransit.dir/Route.cpp.obj	5d09e0c29ae2e6a3
+37	396	7676951850564462	CMakeFiles/busTransit.dir/Vehicle.cpp.obj	25d9480c33b03d70
+52	433	7676951850713963	CMakeFiles/busTransit.dir/Stop.cpp.obj	37f46e02b8b45d85
+22	458	7676951850424927	CMakeFiles/busTransit.dir/main.cpp.obj	a33f8e715c78c52b

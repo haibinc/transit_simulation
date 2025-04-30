@@ -1,0 +1,3 @@
+C:/Users/haibi/CLionProjects/busTransit/cmake-build-debug/CMakeFiles/busTransit.dir
+C:/Users/haibi/CLionProjects/busTransit/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/haibi/CLionProjects/busTransit/cmake-build-debug/CMakeFiles/rebuild_cache.dir
