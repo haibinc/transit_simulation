@@ -1,34 +1,33 @@
 //
 // Created by haibi on 4/29/2025.
+// Updated by Kunj on 5/2/2025.
 //
 
 #ifndef STOP_H
 #define STOP_H
 #include <string>
 
-
-class Stop {
+class Stop
+{
 private:
     std::string stopName;
-    Stop* nextStop;
-    Stop* prevStop;
+    Stop *nextStop;
+    Stop *prevStop;
     int timeToNextStop;
+
 public:
     Stop();
-    Stop(const std::string& stopName, Stop* nextStop, Stop* prevStop, const int timeToNextStop) :
-    stopName(stopName), nextStop(nextStop), prevStop(prevStop), timeToNextStop(timeToNextStop) {};
+    Stop(const std::string &stopName, Stop *nextStop, Stop *prevStop, const int timeToNextStop) : stopName(stopName), nextStop(nextStop), prevStop(prevStop), timeToNextStop(timeToNextStop) {};
 
-    Stop* getNextStop() const;
-    Stop* getPrevStop() const;
+    Stop *getNextStop() const;
+    Stop *getPrevStop() const;
     int getTimeToNextStop() const;
-    const std::string& getStopName() const;
+    const std::string &getStopName() const;
 
-    void setStopName(const std::string& name);
-    void setNextStop(Stop* stop);
-    void setPrevStop(Stop* stop);
+    void setStopName(const std::string &name);
+    void setNextStop(Stop *stop);
+    void setPrevStop(Stop *stop);
     void setTimeToNextStop(int time);
 };
 
-
-
-#endif //STOP_H
+#endif // STOP_H
