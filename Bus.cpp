@@ -1,21 +1,23 @@
 //
-// Created by haibi on 4/29/2025.
+// Created by Kunj on 5/2/2025.
 //
 
 #include "Bus.h"
+#include <iostream>
 
-void Bus::move() override {
-
+void Bus::move()
+{
+    currentStop = (currentStop + 1) % route.getNumStops();
+    reportStop();
 }
 
-int Bus::getBusNumber() const {
-    return this->busNumber;
-}
+int Bus::getBusNumber() const { return busNumber; }
 
-int Bus::getCurrentStop() const {
-    return this->currentStop;
-}
+int Bus::getCurrentStop() const { return currentStop; }
 
-Route Bus::getRoute() const {
-    return this->route;
+Route Bus::getRoute() const { return route; }
+
+void Bus::reportStop() const
+{
+    std::cout << "Bus #" << busNumber << " is at stop " << currentStop << " on route " << route.getRouteName() << std::endl;
 }

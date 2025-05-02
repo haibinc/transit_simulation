@@ -1,36 +1,32 @@
 //
-// Created by haibi on 4/29/2025.
+// Created by Haibi on 4/29/2025.
+// Updated by Kunj on 5/2/2025.
 //
 
 #include "Vehicle.h"
 
-std::string Vehicle::getVin() const{
-    return this->vin;
+Vehicle::~Vehicle() {}
+
+std::string Vehicle::getVin() const { return vin; }
+
+std::string Vehicle::getVehicleType() const { return vehicleType; }
+
+int Vehicle::getTotalCapacity() const { return totalCapacity; }
+
+int Vehicle::getPassengersOnBoard() const { return passengersOnBoard; }
+
+void Vehicle::addPassengers(int amount)
+{
+    passengersOnBoard += amount;
+    if (passengersOnBoard > totalCapacity)
+        passengersOnBoard = totalCapacity;
 }
 
-std::string Vehicle::getVehicleType() const {
-    return this->vehicleType;
+void Vehicle::deletePassengers(int amount)
+{
+    passengersOnBoard -= amount;
+    if (passengersOnBoard < 0)
+        passengersOnBoard = 0;
 }
 
-
-int Vehicle::getTotalCapacity() const {
-    return this->totalCapacity;
-}
-
-int Vehicle::getPassengersOnBoard() const {
-    return passengersOnBoard;
-}
-
-void Vehicle::addPassengers(int amount) {
-    this->passengersOnBoard += amount;
-}
-
-void Vehicle::deletePassengers(int amount) {
-    this->passengersOnBoard -= amount;
-}
-
-void Vehicle::clearBus() {
-    this->passengersOnBoard = 0;
-}
-
-
+void Vehicle::clearBus() { passengersOnBoard = 0; }
