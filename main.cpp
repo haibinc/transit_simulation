@@ -29,7 +29,7 @@ int main()
     route.printRouteBackward();
 
     // Create Bus and simulate movement
-    Bus bus("VIN12345", "City Bus", 40, 10, 25, 0, route);
+    Bus bus("VIN12345", "City Bus", 40, 10, 25, 0, &route);
 
     std::cout << "\nSimulating Bus Movement:\n";
     for (int i = 0; i < route.getNumStops() + 2; ++i)
