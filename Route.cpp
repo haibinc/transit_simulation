@@ -115,6 +115,18 @@ bool Route::stopExist(const std::string &name) const
     return false;
 }
 
+Stop* Route::getStop(const std::string& name) const
+{
+    Stop *current = head;
+    while (current)
+    {
+        if (current->getStopName() == name)
+            return current;
+        current = current->getNextStop();
+    }
+    return nullptr;
+}
+
 void Route::clearRoute()
 {
     while (head)

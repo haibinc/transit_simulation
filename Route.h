@@ -1,5 +1,6 @@
 //
 // Created by haibi on 4/29/2025.
+// Updated by Misha on 5/2/2025.
 //
 
 #ifndef ROUTE_H
@@ -26,6 +27,7 @@ public:
     void printRouteBackward() const;
     const std::string& getRouteName() const;
     bool stopExist(const std::string& name) const;
+    Stop* getStop(const std::string& name) const;
     void clearRoute();
 
 };
