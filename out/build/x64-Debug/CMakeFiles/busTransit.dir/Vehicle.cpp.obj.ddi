@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "CMakeFiles\\busTransit.dir\\Vehicle.cpp.obj",
+            "outputs": [
+                "C:\\Users\\danie\\.SFSU CS\\CSC 340\\transit_simulation\\out\\build\\x64-Debug\\vc140.pdb",
+                "CMakeFiles\\busTransit.dir\\Vehicle.cpp.obj.ddi"
+            ],
+            "requires": []
+        }
+    ]
+}
