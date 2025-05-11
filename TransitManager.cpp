@@ -55,26 +55,28 @@ int getUserAction() {
     return input;
 }
 
-template <typename T>
-void printVector(const std::vector<T>& vector) {
+void printBuses(const std::vector<Bus*>& vector) {
     std:: cout << "[";
-    for (typename std::vector<T>::const_iterator it = vector.begin(); it != vector.end(); ++it) {
-        if (Bus* bus = dynamic_cast<Bus*>(*it)) {
-            std::cout << bus->getBusNumber();
-        } else if (Route* route = dynamic_cast<Route*>(*it)) {
-            std::cout << route->getRouteName();
-        } else if (Stop* stop = dynamic_cast<Stop*>(*it)) {
-            std::cout << stop->getStopName();
-        }
-        if (it < vector.end() - 1) {
-            std::cout << ", ";
-        }
+    for (std::vector<Bus*>::const_iterator it = vector.begin(); it != vector.end(); ++it) {
+        std::cout << (*it)->getBusNumber();
     }
     std:: cout << "]\n";
 }
 
-Route* routeBinarySearch(std::string& name) {
-    return routeBinarySearch(name, registeredRoutes.begin(), registeredRoutes.end());
+void printRoutes(const std::vector<Route*>& vector) {
+    std:: cout << "[";
+    for (std::vector<Route*>::const_iterator it = vector.begin(); it != vector.end(); ++it) {
+        std::cout << (*it)->getRouteName();
+    }
+    std:: cout << "]\n";
+}
+
+void printStops(const std::vector<Stop*>& vector) {
+    std:: cout << "[";
+    for (std::vector<Stop*>::const_iterator it = vector.begin(); it != vector.end(); ++it) {
+        std::cout << (*it)->getStopName();
+    }
+    std:: cout << "]\n";
 }
 
 Route* routeBinarySearch(std::string& name, std::vector<Route*>::const_iterator start, std::vector<Route*>::const_iterator end) {
@@ -90,6 +92,10 @@ Route* routeBinarySearch(std::string& name, std::vector<Route*>::const_iterator 
     } else {
         return routeBinarySearch(name, start, middle);
     }
+}
+
+Route* routeBinarySearch(std::string& name) {
+    return routeBinarySearch(name, registeredRoutes.begin(), registeredRoutes.end());
 }
 
 void addBus() {
@@ -132,10 +138,10 @@ void beginPromptLoop() {
     for (int userAction = getUserAction(); userAction != QUIT; userAction = getUserAction()) {
         switch (userAction) {
             case PRINT_BUSES:
-                printVector(registeredBuses);
+                printBuses(registeredBuses);
                 break;
             case PRINT_ROUTES:
-                printVector(registeredRoutes);
+                printRoutes(registeredRoutes);
                 break;
             case PRINT_STOPS_IN_ROUTE:
                 std::cout << "FINISH ME!\n";

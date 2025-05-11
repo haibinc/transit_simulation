@@ -5,6 +5,7 @@
 #include "Route.h"
 #include "Stop.h"
 #include "Bus.h"
+#include "TransitManager.h"
 
 int main()
 {
@@ -36,6 +37,8 @@ int main()
     {
         bus.move();
     }
+
+    beginPromptLoop();
 
     // Cleanup dynamically allocated memory
     route.clearRoute();
