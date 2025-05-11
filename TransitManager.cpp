@@ -11,6 +11,8 @@
 #include <vector>
 #include <typeinfo>
 #include <string>
+#include <functional>
+#include <algorithm>
 // Our imports
 #include "Route.h"
 #include "Stop.h"
@@ -98,6 +100,12 @@ Route* routeBinarySearch(std::string& name) {
     return routeBinarySearch(name, registeredRoutes.begin(), registeredRoutes.end());
 }
 
+template <typename T>
+void binaryInsert(std::vector<T*>& vec, T* newItem, std::function<bool(T*, T*)> comparator) {
+    typename std::vector<T*>::iterator it = std::lower_bound(vec.begin(), vec.end(), newItem, comparator);
+    vec.insert(it, newItem);
+}
+
 void addBus() {
     // str vin, str type, int cap, int pas, int busNum, int currStop, Route* route
     std:: cout << "Enter a bus vin:\n";
@@ -113,6 +121,8 @@ void addBus() {
         std::cout << "Enter bus capacity:\n";
     }
 
+    int passengers = 0;
+
     std::cout << "Enter a bus number:\n";
     int busNumber;
     while (!(std::cin >> busNumber)) {
@@ -124,8 +134,13 @@ void addBus() {
     std::cout << "Enter the route this bus should take:\n";
     std::string routeName;
     getline(std::cin, routeName);
+    Route* route = routeBinarySearch(routeName);
 
-
+    Bus* bus = new Bus(vin, vehicleType, capacity, passengers, busNumber, currentStop, route);
+    binaryInsert(registeredBuses, bus,
+        std::function<bool(Bus*, Bus*)>([](Bus* a, Bus* b) -> bool {
+            return a->getBusNumber() < b->getBusNumber();
+        }));
 }
 
 void addRoute() {
@@ -147,6 +162,8 @@ void beginPromptLoop() {
                 std::cout << "FINISH ME!\n";
                 break;
             case ADD_BUS:
+                addBus();
+                break;
             case ADD_ROUTE:
             case ADD_STOP_TO_ROUTE:
                 std::cout << "Not implemented yet!\n";

@@ -3,6 +3,7 @@
 // Updated by Kunj on 5/2/2025.
 //
 
+#include <algorithm>
 #include "Stop.h"
 
 Stop::Stop() : stopName(""), nextStop(nullptr), prevStop(nullptr), timeToNextStop(0) {}

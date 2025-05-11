@@ -4,6 +4,12 @@
 
 #include "Bus.h"
 #include <iostream>
+#include <algorithm>
+
+Bus::~Bus() {
+    for (Passenger* p : passengers)
+        delete p;
+}
 
 void Bus::move()
 {

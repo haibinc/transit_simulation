@@ -25,7 +25,7 @@ public:
         const int busNumber, int currentStop, Route* route)
         : Vehicle(vin, vehicleType, totalCapacity, passengersOnBoard),
           busNumber(busNumber), currentStop(currentStop), route(route) {};
-
+    ~Bus();
     void move() override;
     int getBusNumber() const;
     int getCurrentStop() const;
