@@ -1,0 +1,11 @@
+ninja_dyndep_version = 1.0
+build CMakeFiles\busTransit.dir\main.cpp.obj: dyndep
+
+build CMakeFiles\busTransit.dir\Vehicle.cpp.obj: dyndep
+
+build CMakeFiles\busTransit.dir\Bus.cpp.obj: dyndep
+
+build CMakeFiles\busTransit.dir\Stop.cpp.obj: dyndep
+
+build CMakeFiles\busTransit.dir\Route.cpp.obj: dyndep
+

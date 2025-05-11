@@ -1,0 +1,19 @@
+# ninja log v6
+14	124	7685574879464853	CMakeFiles/busTransit.dir/Vehicle.cpp.obj.ddi	67cd56ea9ad99ce0
+23	137	7685574879552603	CMakeFiles/busTransit.dir/Stop.cpp.obj.ddi	5faf996cf0c4ff6c
+18	151	7685574879511256	CMakeFiles/busTransit.dir/Bus.cpp.obj.ddi	10173e6b14c35991
+8	153	7685574879402592	CMakeFiles/busTransit.dir/main.cpp.obj.ddi	c1e5adc8e492648a
+27	160	7685574879593921	CMakeFiles/busTransit.dir/Route.cpp.obj.ddi	4cce19c9751bb20
+160	231	7685574881582836	CMakeFiles/busTransit.dir/CXX.dd	fe5ae211cfb5ca74
+160	231	7685574881582836	C:/Users/danie/.SFSU CS/CSC 340/transit_simulation/out/build/x64-Debug/CMakeFiles/busTransit.dir/CXXModules.json	fe5ae211cfb5ca74
+160	231	7685574881582836	CMakeFiles/busTransit.dir/main.cpp.obj.modmap	fe5ae211cfb5ca74
+160	231	7685574881582836	CMakeFiles/busTransit.dir/Vehicle.cpp.obj.modmap	fe5ae211cfb5ca74
+160	231	7685574881582836	CMakeFiles/busTransit.dir/Bus.cpp.obj.modmap	fe5ae211cfb5ca74
+160	231	7685574881582836	CMakeFiles/busTransit.dir/Stop.cpp.obj.modmap	fe5ae211cfb5ca74
+160	231	7685574881582836	CMakeFiles/busTransit.dir/Route.cpp.obj.modmap	fe5ae211cfb5ca74
+242	679	7685574881753612	CMakeFiles/busTransit.dir/Vehicle.cpp.obj	bc37bc98f4ad0cd7
+252	730	7685574881841238	CMakeFiles/busTransit.dir/Stop.cpp.obj	706a248f77718e33
+238	939	7685574881706466	CMakeFiles/busTransit.dir/main.cpp.obj	a6bca194a3739b80
+256	942	7685574881887927	CMakeFiles/busTransit.dir/Route.cpp.obj	93679aff72472987
+247	960	7685574881794880	CMakeFiles/busTransit.dir/Bus.cpp.obj	c9179ba4a125dff8
+960	1306	7685574888923703	busTransit.exe	651f411ed23cc64c
