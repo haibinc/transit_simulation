@@ -24,9 +24,38 @@ int Bus::getCurrentStop() const { return currentStop; }
 
 Route* Bus::getRoute() const { return route; }
 
+StopNode* getCurrentStopNode(Route* route, int i) {
+    int counter = 0;
+    StopNode* current = route->getHead();
+    while (current)
+    {
+        if (counter == i) {
+            return current;
+        }
+        current = current->getNextStopNode();
+        counter++;
+    }
+    return nullptr;
+}
+
 void Bus::reportStop() const
 {
-    std::cout << "Bus #" << busNumber << " is at stop " << currentStop << " on route " << route->getRouteName() << std::endl;
+    std::cout << *this << " is at " << *(getCurrentStopNode(getRoute(), currentStop)->getStop()) << " on " << *route << "" << std::endl;
+}
+
+void Bus::progress() {
+    int counter = 0;
+    StopNode* current = getCurrentStopNode(getRoute(), currentStop);
+
+    if (current) {
+        routeProgress++;
+        if (routeProgress >= current->getTimeToNextStop()) {
+            routeProgress = 0;
+            move();
+        }
+    }
+
+    
 }
 
 std::vector<Passenger*> Bus::getPassengers() const { return passengers; }

@@ -16,6 +16,13 @@ g++ -fdiagnostics-color=always -g C:/Users/misha/Documents/GitHub/transit_simula
 #include <limits>
 #include <functional>
 #include <sstream>
+#include <random>
+#include <array>
+#include <unordered_map>
+#include <cmath>
+#include <map>
+#include <thread>
+#include <chrono>
 // Our imports
 #include "Route.h"
 #include "Stop.h"
@@ -300,6 +307,15 @@ void deleteItem(std::vector<T*>& registry, T* item) {
     }
 }
 
+template <typename T>
+void deleteVector(std::vector<T*>& registry) {
+    typename std::vector<T*>::iterator it = registry.begin();
+    for (; it < registry.end(); ++it) {
+        delete *it;
+    }
+    registry.clear();
+}
+
 void removeBus() {
     deleteItem(registeredBuses, getValidBus());
 }
@@ -393,7 +409,11 @@ void removeStopFromRoute() {
     route->removeStop(stop->getStopName());
 }
 
-void loadDefaultManager() {
+void loadDefaultRegistry() {
+    deleteVector(registeredBuses);
+    deleteVector(registeredRoutes);
+    deleteVector(registeredStops);
+
     Stop* s1 = new Stop("Daly City");
     Stop* s2 = new Stop("Sunnyvale");
     Stop* s3 = new Stop("San Jose");
@@ -441,9 +461,9 @@ void loadDefaultManager() {
 
     Bus* b1 = new Bus("VIN123", "City Bus", 30, 0, 30, 0, r2);
     Bus* b2 = new Bus("VIN132", "City Bus", 30, 0, 29, 0, r3);
-    Bus* b3 = new Bus("VIN213", "City Bus", 30, 0, 151, 0, r2);
+    Bus* b3 = new Bus("VIN213", "City Bus", 30, 0, 30, 0, r2);
     Bus* b4 = new Bus("VIN231", "City Bus", 30, 0, 59, 0, r1);
-    Bus* b5 = new Bus("VIN312", "City Bus", 30, 0, 83, 0, r3);
+    Bus* b5 = new Bus("VIN312", "City Bus", 30, 0, 29, 0, r3);
     Bus* b6 = new Bus("VIN321", "City Bus", 30, 0, 121, 0, r4);
 
     busBinaryInsert(b1);
@@ -454,8 +474,140 @@ void loadDefaultManager() {
     busBinaryInsert(b6);
 }
 
+void loadRegistry1() {
+    deleteVector(registeredBuses);
+    deleteVector(registeredRoutes);
+    deleteVector(registeredStops);
+
+    Stop* s1 = new Stop("Kitchen");
+    Stop* s2 = new Stop("Living Room");
+    Stop* s3 = new Stop("Bathroom");
+    Stop* s4 = new Stop("Bedroom");
+    Stop* s5 = new Stop("Guest Room");
+    Stop* s6 = new Stop("Dining room");
+
+    stopBinaryInsert(s1);
+    stopBinaryInsert(s2);
+    stopBinaryInsert(s3);
+    stopBinaryInsert(s4);
+    stopBinaryInsert(s5);
+    stopBinaryInsert(s6);
+
+    Route* r1 = new Route("Route#1");
+    r1->addStopToBack(s2);
+    r1->addStopToBack(s5);
+    Route* r2 = new Route("Route#2");
+    r2->addStopToBack(s6);
+    r2->addStopToBack(s4);
+    r2->addStopToBack(s3);
+    r2->addStopToBack(s1);
+    Route* r3 = new Route("Route#3");
+    r3->addStopToBack(s4);
+    r3->addStopToBack(s3);
+
+    routeBinaryInsert(r1);
+    routeBinaryInsert(r2);
+    routeBinaryInsert(r3);
+
+    Bus* b1 = new Bus("VIN123", "RC Bus", 2, 0, 30, 0, r2);
+    Bus* b2 = new Bus("VIN132", "RC Bus", 2, 0, 29, 0, r3);
+    Bus* b3 = new Bus("VIN213", "RC Bus", 2, 0, 30, 0, r2);
+    Bus* b4 = new Bus("VIN231", "RC Bus", 2, 0, 59, 0, r1);
+    Bus* b5 = new Bus("VIN312", "RC Bus", 2, 0, 29, 0, r3);
+
+    busBinaryInsert(b1);
+    busBinaryInsert(b2);
+    busBinaryInsert(b3);
+    busBinaryInsert(b4);
+    busBinaryInsert(b5);
+}
+
+void loadReg() {
+    std:: cout << "Enter a number corresponding to a registry (0-1):" << std::endl;
+    int input = getValidInt();
+    while (input < 0 || input > 1) {
+        std::cout << "Enter a number in the range 0-1! Please try again." << std::endl;
+        input = getValidInt();
+    }
+
+    if (input == 0) {
+        std:: cout << "Loading registry 0..." << std::endl;
+        loadDefaultRegistry();
+        std:: cout << "Done!" << std::endl;
+    } else if (input == 1) {
+        std:: cout << "Loading registry 1..." << std::endl;
+        loadRegistry1();
+        std:: cout << "Done!" << std::endl;
+    }
+}
+
+void startSimulation() {
+    std::mt19937 rng(42);
+    std::uniform_int_distribution<int> dist(0, 100);
+
+    std::unordered_map<Stop*, std::array<int, 2>> coords;
+
+    std::cout << "Randomizing stop placements..." << std::endl;
+    for (std::vector<Stop*>::const_iterator it = registeredStops.cbegin(); it < registeredStops.cend(); ++it) {
+        int x = dist(rng);
+        int y = dist(rng);
+        coords.insert({ *it, { x, y }});
+        std::cout << **it << " is located at (" << x << ", " << y << ")" << std::endl;
+    }
+
+    for (std::vector<Route*>::const_iterator it = registeredRoutes.cbegin(); it < registeredRoutes.cend(); ++it) { // XXX If one stop in route
+        std::cout << "Calculating delays for " << **it << std::endl;
+
+        StopNode* node = (*it)->getHead();
+        do {
+            StopNode* nextNode;
+            if (node->getNextStopNode()) {
+                nextNode = node->getNextStopNode();
+            } else {
+                nextNode = (*it)->getHead();
+            }
+
+            Stop* stop = node->getStop();
+            Stop* newStop = nextNode->getStop();
+            int x = coords.at(stop)[0] - coords.at(newStop)[0];
+            int y = coords.at(stop)[1] - coords.at(newStop)[1];
+            int dist = std::sqrt(x * x + y * y) / 10;
+            node->setTimeToNextStop(dist);
+
+            std::cout << "from " << stop->getStopName() << " to " << newStop->getStopName() << " has delay " << dist << std::endl;
+
+            node = node->getNextStopNode();
+        } while (node != nullptr);
+    }
+
+    std::cout << "Randomizing bus locations..." << std::endl;
+    std::uniform_int_distribution<int> moves(0, 10);
+    for (std::vector<Bus*>::iterator it = registeredBuses.begin(); it < registeredBuses.end(); ++it) {
+        for (int i = 0; i < moves(rng); i++) {
+            (*it)->move();
+        }
+        std::cout << **it << " is now at stop " << (*it)->getCurrentStop() << std::endl;
+    }
+
+    std::cout << "How many times steps would you like to run the simulation for:" << std::endl;
+    int steps = getValidInt();
+
+    int counter = 0;
+    std::cout << "Starting simulation..." << std::endl;
+    while (counter <= steps) { // Event loop
+        std::cout << "Step " << counter << std::endl;
+        for (std::vector<Bus*>::iterator it = registeredBuses.begin(); it < registeredBuses.end(); ++it) {
+            (*it)->progress();
+        }
+
+        counter++;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
+
 void beginPromptLoop() {
-    loadDefaultManager();
+    loadDefaultRegistry();
+    loadRegistry1();
 
     std::cout << "\nTransitManager started!" << std::endl;
 
@@ -510,10 +662,13 @@ void beginPromptLoop() {
                 removeStopFromRoute();
                 break;
             case SAVE_REG:
+                std::cout << "WIP!" << std::endl;
                 break;
             case LOAD_REG:
+                loadReg();
                 break;
             case BEGIN_SIM:
+                startSimulation();
                 break;
             default:
                 std::cout << "Unknown action!" << std::endl;
@@ -522,6 +677,10 @@ void beginPromptLoop() {
 
         std::cout << std::endl;
     }
+
+    deleteVector(registeredBuses);
+    deleteVector(registeredRoutes);
+    deleteVector(registeredStops);
 
     std::cout << "The transit manager has been quit! Goodbye!" << std::endl;
 }

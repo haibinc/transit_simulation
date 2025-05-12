@@ -165,6 +165,14 @@ void Route::clearRoute()
     numStops = 0;
 }
 
+StopNode* Route::getHead() {
+    return head;
+}
+
+StopNode* Route::getTail() {
+    return tail;
+}
+
 std::ostream& operator<<(std::ostream& strm, const Route& route) {
     strm << "Route(NAME:" << route.getRouteName() << ", SIZE:" << route.getNumStops() << ")";
     return strm;

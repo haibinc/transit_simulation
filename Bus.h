@@ -15,6 +15,7 @@
 class Bus : public Vehicle
 {
 private:
+    int routeProgress;
     const int busNumber;
     int currentStop;
     Route* route;
@@ -25,8 +26,9 @@ public:
         int totalCapacity, int passengersOnBoard,
         const int busNumber, int currentStop, Route* route)
         : Vehicle(vin, vehicleType, totalCapacity, passengersOnBoard),
-          busNumber(busNumber), currentStop(currentStop), route(route) {};
+          busNumber(busNumber), currentStop(currentStop), route(route), routeProgress(0) {};
     ~Bus();
+    void progress();
     void move() override;
     int getBusNumber() const;
     int getCurrentStop() const;

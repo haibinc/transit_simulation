@@ -32,6 +32,8 @@ public:
     bool stopExist(const std::string& name) const;
     Stop* getStop(const std::string& name) const;
     void clearRoute();
+    StopNode* getHead();
+    StopNode* getTail();
 };
 
 std::ostream& operator<<(std::ostream& strm, const Route& route);
