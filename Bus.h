@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <ostream>
 #include "Vehicle.h"
 #include "Route.h"
 #include "Passenger.h"
@@ -38,5 +39,25 @@ public:
     bool addPassenger(Passenger* passenger);
     bool removePassenger(Passenger* passenger);
 };
+
+std::ostream& operator<<(std::ostream& strm, const Bus& bus);
+
+bool operator<(const Bus& lhs, const Bus& rhs);
+
+bool operator>(const Bus& lhs, const Bus& rhs);
+
+bool operator==(const Bus& lhs, const Bus& rhs);
+
+bool operator==(const std::string& lhs, Bus& rhs);
+
+bool operator==(const Bus& lhs, const std::string& rhs);
+
+bool operator<(const std::string& lhs, const Bus& rhs);
+
+bool operator<(const Bus& lhs, const std::string& rhs);
+
+bool operator>(const std::string& lhs, const Bus& rhs);
+
+bool operator>(const Bus& lhs, const std::string& rhs);
 
 #endif // BUS_H

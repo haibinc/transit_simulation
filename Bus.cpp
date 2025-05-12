@@ -5,6 +5,7 @@
 #include "Bus.h"
 #include <iostream>
 #include <algorithm>
+#include <ostream>
 
 Bus::~Bus() {
     for (Passenger* p : passengers)
@@ -55,5 +56,46 @@ bool Bus::removePassenger(Passenger* passenger)
         return true;
     }
     return false;
+}
+
+std::ostream& operator<<(std::ostream& strm, const Bus& bus) {
+    strm << "Bus(VIN:" << bus.getVin() << ", NUM:" << bus.getBusNumber() << ", CAP:" << bus.getTotalCapacity() << ", ROUT:" << bus.getRoute()->getRouteName() << ")";
+    return strm;
+}
+
+bool operator<(const Bus& lhs, const Bus& rhs) {
+    return lhs.getVin() < rhs.getVin();
+}
+
+bool operator>(const Bus& lhs, const Bus& rhs) {
+    return rhs.getVin() > lhs.getVin();
+}
+
+bool operator==(const Bus& lhs, const Bus& rhs) {
+    return lhs.getVin() == rhs.getVin();
+}
+
+bool operator==(const std::string& lhs, Bus& rhs) {
+    return lhs == rhs.getVin();
+}
+
+bool operator==(const Bus& lhs, const std::string& rhs) {
+    return lhs.getVin() == rhs;
+}
+
+bool operator<(const std::string& lhs, const Bus& rhs) {
+    return lhs < rhs.getVin();
+}
+
+bool operator<(const Bus& lhs, const std::string& rhs) {
+    return lhs.getVin() < rhs;
+}
+
+bool operator>(const std::string& lhs, const Bus& rhs) {
+    return lhs > rhs.getVin();
+}
+
+bool operator>(const Bus& lhs, const std::string& rhs) {
+    return lhs.getVin() > rhs;
 }
 

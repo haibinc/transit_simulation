@@ -1,5 +1,7 @@
 #include "Route.h"
+#include "StopNode.h"
 #include <iostream>
+#include <ostream>
 
 Route::Route(const std::string &name) : routeName(name), head(nullptr), tail(nullptr), numStops(0) {}
 
@@ -9,71 +11,95 @@ int Route::getNumStops() const { return numStops; }
 
 void Route::addStopToFront(Stop *stop)
 {
+    StopNode* newStop = new StopNode(stop);
     if (!head)
     {
-        head = tail = stop;
+        head = tail = newStop;
     }
     else
     {
-        stop->setNextStop(head);
-        head->setPrevStop(stop);
-        head = stop;
+        newStop->setNextStopNode(head);
+        head->setPrevStopNode(newStop);
+        head = newStop;
     }
     ++numStops;
 }
 
 void Route::addStopToBack(Stop *stop)
 {
+    StopNode* newStop = new StopNode(stop);
     if (!tail)
     {
-        head = tail = stop;
+        head = tail = newStop;
     }
     else
     {
-        tail->setNextStop(stop);
-        stop->setPrevStop(tail);
-        tail = stop;
+        tail->setNextStopNode(newStop);
+        newStop->setPrevStopNode(tail);
+        tail = newStop;
     }
     ++numStops;
 }
 
-void Route::addStopAfter(Stop *addStop, const std::string &existingStop)
+void Route::addStopBefore(Stop *addStop, const std::string &existingStop)
 {
-    Stop *current = head;
-    while (current && current->getStopName() != existingStop)
+    StopNode *current = head;
+    while (current && current->getStop()->getStopName() != existingStop)
     {
-        current = current->getNextStop();
+        current = current->getNextStopNode();
     }
     if (current)
     {
-        addStop->setNextStop(current->getNextStop());
-        addStop->setPrevStop(current);
-        if (current->getNextStop())
-            current->getNextStop()->setPrevStop(addStop);
-        current->setNextStop(addStop);
+        StopNode* newStop = new StopNode(addStop);
+        newStop->setNextStopNode(current);
+        newStop->setPrevStopNode(current->getPrevStopNode());
+        if (current->getPrevStopNode())
+            current->getPrevStopNode()->setNextStopNode(newStop);
+        current->setPrevStopNode(newStop);
+        if (current == head)
+            head = newStop;
+        ++numStops;
+    }
+}
+
+void Route::addStopAfter(Stop *addStop, const std::string &existingStop)
+{
+    StopNode *current = head;
+    while (current && current->getStop()->getStopName() != existingStop)
+    {
+        current = current->getNextStopNode();
+    }
+    if (current)
+    {
+        StopNode* newStop = new StopNode(addStop);
+        newStop->setNextStopNode(current->getNextStopNode());
+        newStop->setPrevStopNode(current);
+        if (current->getNextStopNode())
+            current->getNextStopNode()->setPrevStopNode(newStop);
+        current->setNextStopNode(newStop);
         if (current == tail)
-            tail = addStop;
+            tail = newStop;
         ++numStops;
     }
 }
 
 void Route::removeStop(const std::string &name)
 {
-    Stop *current = head;
-    while (current && current->getStopName() != name)
+    StopNode *current = head;
+    while (current && current->getStop()->getStopName() != name)
     {
-        current = current->getNextStop();
+        current = current->getNextStopNode();
     }
     if (current)
     {
-        if (current->getPrevStop())
-            current->getPrevStop()->setNextStop(current->getNextStop());
-        if (current->getNextStop())
-            current->getNextStop()->setPrevStop(current->getPrevStop());
+        if (current->getPrevStopNode())
+            current->getPrevStopNode()->setNextStopNode(current->getNextStopNode());
+        if (current->getNextStopNode())
+            current->getNextStopNode()->setPrevStopNode(current->getPrevStopNode());
         if (current == head)
-            head = current->getNextStop();
+            head = current->getNextStopNode();
         if (current == tail)
-            tail = current->getPrevStop();
+            tail = current->getPrevStopNode();
         delete current;
         --numStops;
     }
@@ -81,22 +107,22 @@ void Route::removeStop(const std::string &name)
 
 void Route::printRouteForward() const
 {
-    Stop *current = head;
+    StopNode *current = head;
     while (current)
     {
-        std::cout << current->getStopName() << " -> ";
-        current = current->getNextStop();
+        std::cout << current->getStop()->getStopName() << " -> ";
+        current = current->getNextStopNode();
     }
     std::cout << "END\n";
 }
 
 void Route::printRouteBackward() const
 {
-    Stop *current = tail;
+    StopNode *current = tail;
     while (current)
     {
-        std::cout << current->getStopName() << " <- ";
-        current = current->getPrevStop();
+        std::cout << current->getStop()->getStopName() << " <- ";
+        current = current->getPrevStopNode();
     }
     std::cout << "START\n";
 }
@@ -105,24 +131,24 @@ const std::string &Route::getRouteName() const { return routeName; }
 
 bool Route::stopExist(const std::string &name) const
 {
-    Stop *current = head;
+    StopNode *current = head;
     while (current)
     {
-        if (current->getStopName() == name)
+        if (current->getStop()->getStopName() == name)
             return true;
-        current = current->getNextStop();
+        current = current->getNextStopNode();
     }
     return false;
 }
 
 Stop* Route::getStop(const std::string& name) const
 {
-    Stop *current = head;
+    StopNode *current = head;
     while (current)
     {
-        if (current->getStopName() == name)
-            return current;
-        current = current->getNextStop();
+        if (current->getStop()->getStopName() == name)
+            return current->getStop();
+        current = current->getNextStopNode();
     }
     return nullptr;
 }
@@ -131,10 +157,51 @@ void Route::clearRoute()
 {
     while (head)
     {
-        Stop *temp = head;
-        head = head->getNextStop();
+        StopNode *temp = head;
+        head = head->getNextStopNode();
         delete temp;
     }
     tail = nullptr;
     numStops = 0;
+}
+
+std::ostream& operator<<(std::ostream& strm, const Route& route) {
+    strm << "Route(NAME:" << route.getRouteName() << ", SIZE:" << route.getNumStops() << ")";
+    return strm;
+}
+
+bool operator<(const Route& lhs, const Route& rhs) {
+    return lhs.getRouteName() < rhs.getRouteName();
+}
+
+bool operator>(const Route& lhs, const Route& rhs) {
+    return rhs.getRouteName() > lhs.getRouteName();
+}
+
+bool operator==(const Route& lhs, const Route& rhs) {
+    return lhs.getRouteName() == rhs.getRouteName();
+}
+
+bool operator==(const std::string& lhs, Route& rhs) {
+    return lhs == rhs.getRouteName();
+}
+
+bool operator==(const Route& lhs, const std::string& rhs) {
+    return lhs.getRouteName() == rhs;
+}
+
+bool operator<(const std::string& lhs, const Route& rhs) {
+    return lhs < rhs.getRouteName();
+}
+
+bool operator<(const Route& lhs, const std::string& rhs) {
+    return lhs.getRouteName() < rhs;
+}
+
+bool operator>(const std::string& lhs, const Route& rhs) {
+    return lhs > rhs.getRouteName();
+}
+
+bool operator>(const Route& lhs, const std::string& rhs) {
+    return lhs.getRouteName() > rhs;
 }

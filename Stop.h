@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <ostream>
 #include "Passenger.h"
 
 class Stop
@@ -16,27 +17,37 @@ class Stop
 private:
     std::string stopName;
     std::vector<Passenger*> passengers; 
-    Stop *nextStop;
-    Stop *prevStop;
-    int timeToNextStop;
 
 public:
     Stop();
-    Stop(const std::string &stopName, Stop *nextStop, Stop *prevStop, const int timeToNextStop) : stopName(stopName), nextStop(nextStop), prevStop(prevStop), timeToNextStop(timeToNextStop) {};
+    Stop(const std::string &stopName) : stopName(stopName) {};
 
-    Stop *getNextStop() const;
-    Stop *getPrevStop() const;
-    int getTimeToNextStop() const;
     const std::string &getStopName() const;
     std::vector<Passenger*> getPassengers() const;
 
     void setStopName(const std::string &name);
-    void setNextStop(Stop *stop);
-    void setPrevStop(Stop *stop);
-    void setTimeToNextStop(int time);
-
     void addPassenger(Passenger* passenger);
     void removePassenger(Passenger* passenger);
 };
+
+std::ostream& operator<<(std::ostream& strm, const Stop& stop);
+
+bool operator<(const Stop& lhs, const Stop& rhs);
+
+bool operator>(const Stop& lhs, const Stop& rhs);
+
+bool operator==(const Stop& lhs, const Stop& rhs);
+
+bool operator==(const std::string& lhs, Stop& rhs);
+
+bool operator==(const Stop& lhs, const std::string& rhs);
+
+bool operator<(const std::string& lhs, const Stop& rhs);
+
+bool operator<(const Stop& lhs, const std::string& rhs);
+
+bool operator>(const std::string& lhs, const Stop& rhs);
+
+bool operator>(const Stop& lhs, const std::string& rhs);
 
 #endif // STOP_H

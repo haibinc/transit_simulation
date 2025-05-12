@@ -3,7 +3,7 @@
 //
 
 /*
- g++ -fdiagnostics-color=always -g C:/Users/misha/Documents/GitHub/transit_simulation/main.cpp C:/Users/misha/Documents/GitHub/transit_simulation/Route.cpp C:/Users/misha/Documents/GitHub/transit_simulation/Bus.cpp C:/Users/misha/Documents/GitHub/transit_simulation/Vehicle.cpp C:/Users/misha/Documents/GitHub/transit_simulation/Stop.cpp C:/Users/misha/Documents/GitHub/transit_simulation/TransitManager.cpp -o C:/Users/misha/Documents/GitHub/transit_simulation/main.exe
+g++ -fdiagnostics-color=always -g C:/Users/misha/Documents/GitHub/transit_simulation/main.cpp C:/Users/misha/Documents/GitHub/transit_simulation/Route.cpp C:/Users/misha/Documents/GitHub/transit_simulation/Bus.cpp C:/Users/misha/Documents/GitHub/transit_simulation/Vehicle.cpp C:/Users/misha/Documents/GitHub/transit_simulation/Stop.cpp C:/Users/misha/Documents/GitHub/transit_simulation/TransitManager.cpp C:/Users/misha/Documents/GitHub/transit_simulation/StopNode.cpp -o C:/Users/misha/Documents/GitHub/transit_simulation/main.exe 
 */
 
 // Library imports
@@ -13,6 +13,9 @@
 #include <string>
 #include <functional>
 #include <algorithm>
+#include <limits>
+#include <functional>
+#include <sstream>
 // Our imports
 #include "Route.h"
 #include "Stop.h"
@@ -20,35 +23,114 @@
 #include "TransitManager.h"
 
 enum Actions { 
-    PRINT_BUSES, PRINT_ROUTES, PRINT_STOPS_IN_ROUTE, // Print actions 
-    ADD_BUS, ADD_ROUTE, ADD_STOP_TO_ROUTE, // Add actions
-    QUIT // Last element also used for bound checks
+     // Print actions 
+    PRINT_BUSES, PRINT_ROUTES, PRINT_STOPS, PRINT_STOPS_IN_ROUTE,
+    // Add actions
+    ADD_BUS, ADD_ROUTE, ADD_STOP, 
+    // Remove actions
+    REMOVE_BUS, REMOVE_ROUTE, REMOVE_STOP,
+    // Modify actions
+    ADD_ROUTE_STOP_BEGIN, ADD_ROUTE_STOP_END, ADD_ROUTE_STOP_BEFORE, ADD_ROUTE_STOP_AFTER, REMOVE_ROUTE_STOP, 
+    // IO
+    SAVE_REG, LOAD_REG,
+    // Sim
+    BEGIN_SIM,
+    // Last element also used for bound checks
+    QUIT
 };
 
 std::vector<Bus*> registeredBuses;
 std::vector<Route*> registeredRoutes;
+std::vector<Stop*> registeredStops;
 
 void promptActions() {
-    std::cout << "Type a number corresponding with any of the following actions:\n";
-    // Prints
-    std::cout << "(" << PRINT_BUSES << ") prints all buses that are controlled by this manager.\n";
-    std::cout << "(" << PRINT_ROUTES << ") prints all routes that are controlled by this manager.\n";
-    std::cout << "(" << PRINT_STOPS_IN_ROUTE << ") prints all stops that are controlled by this manager.\n";
-    // Adds
-    std::cout << "(" << ADD_BUS << ") adds a bus to the list of registered buses.\n";
-    std::cout << "(" << ADD_ROUTE << ") adds a route to the list of registered routes.\n";
-    std::cout << "(" << ADD_STOP_TO_ROUTE << ") adds a stop to the list of registered stops.\n";
-    // Quit
-    std::cout << "(" << QUIT << ") quits the transit manager.\n";
+    std::cout << "Type a number corresponding with any of the following actions:" << std::endl;
+    std::cout << "---- PRINT ----" << std::endl;
+    std::cout << "(" << PRINT_BUSES << ") prints all buses that are controlled by this manager." << std::endl;
+    std::cout << "(" << PRINT_ROUTES << ") prints all routes that are controlled by this manager." << std::endl;
+    std::cout << "(" << PRINT_STOPS << ") prints all stops that are controlled by this manager." << std::endl;
+    std::cout << "(" << PRINT_STOPS_IN_ROUTE << ") prints all the stops that are on a route." << std::endl;
+    std::cout << "---- ADD ----" << std::endl;
+    std::cout << "(" << ADD_BUS << ") adds a bus to the list of registered buses." << std::endl;
+    std::cout << "(" << ADD_ROUTE << ") adds a route to the list of registered routes." << std::endl;
+    std::cout << "(" << ADD_STOP << ") adds a stop to the list of registered stops." << std::endl;
+    std::cout << "---- REMOVE ----" << std::endl;
+    std::cout << "(" << REMOVE_BUS << ") removes a bus from the list of registered buses." << std::endl;
+    std::cout << "(" << REMOVE_ROUTE << ") removes a route from the list of registered routes." << std::endl;
+    std::cout << "(" << REMOVE_STOP << ") removes a stop from the list of registered stops." << std::endl;
+    std::cout << "---- MODIFY ----" << std::endl;
+    std::cout << "(" << ADD_ROUTE_STOP_BEGIN << ") prepends a stop to an already registered route." << std::endl;
+    std::cout << "(" << ADD_ROUTE_STOP_END << ") appends a stop to an already registered route." << std::endl;
+    std::cout << "(" << ADD_ROUTE_STOP_BEFORE << ") inserts a stop behind another stop in an already registered route." << std::endl;
+    std::cout << "(" << ADD_ROUTE_STOP_AFTER << ") inserts a stop after another stop in an already registered route" << std::endl;
+    std::cout << "(" << REMOVE_ROUTE_STOP << ") removes a stop from an already registered route." << std::endl;
+    std::cout << "---- IO ----" << std::endl;
+    std::cout << "(" << SAVE_REG << ") saves current registry to a file." << std::endl;
+    std::cout << "(" << LOAD_REG << ") loads registry from file." << std::endl;
+    std::cout << "---- SIMULATE ----" << std::endl;
+    std::cout << "(" << BEGIN_SIM << ") begins the simulation of the transit manager using all buses, routes, and stops." << std::endl;
+    // End
+    std::cout << "(" << QUIT << ") quits the transit manager." << std::endl;
+}
+
+int getValidInt() {
+    int input = 0;
+    std::string line;
+    
+    while (true) {
+        std::getline(std::cin, line);
+        
+        std::istringstream stream(line);
+        if (stream >> input && stream.eof()) {
+            break;
+        } else {
+            std::cout << "Invalid input! Please enter a valid integer." << std::endl;
+        }
+    }
+
+    return input;
+}
+
+std::string getSpacelessString() {
+    std::string input;
+
+    while (true) {
+        std::getline(std::cin, input);
+
+        if (!input.empty() && std::none_of(input.begin(), input.end(), ::isspace)) {
+            break;
+        } else {
+            std::cout << "Invalid input! Please enter a word without spaces." << std::endl;
+        }
+    }
+
+    return input;
+}
+
+
+std::string getNonEmptyString() {
+    std::string input;
+
+    while (true) {
+        std::getline(std::cin, input);
+
+        if (!input.empty()) {
+            break;
+        } else {
+            std::cout << "Input cannot be empty. Please try again." << std::endl;
+        }
+    }
+
+    return input;
 }
 
 int getUserAction() {
     int input = -1;
 
     // Verify user input
-    for (bool first = true; input < 0 || input > QUIT; std::cin >> input, first = false) {
+    for (bool first = true; input < 0 || input > QUIT; first = false, input = getValidInt()) {
         if (!first) {
-            std::cout << "Invalid input! Please make sure you input is between 0 and " << (QUIT) << "!\n";
+            std::cout << "Invalid input! Please make sure you input is between 0 and " << (QUIT) << "!" << std::endl;
         }
 
         promptActions();
@@ -57,123 +139,390 @@ int getUserAction() {
     return input;
 }
 
-void printBuses(const std::vector<Bus*>& vector) {
-    std:: cout << "[";
-    for (std::vector<Bus*>::const_iterator it = vector.begin(); it != vector.end(); ++it) {
-        std::cout << (*it)->getBusNumber();
+template <typename T> 
+void printVector(const std::vector<T*>& vector) {
+    for (typename std::vector<T*>::const_iterator it = vector.begin(); it != vector.end(); ++it) {
+        std::cout << **it;
+        if (it < vector.end() - 1) {
+            std::cout << ", ";
+        }
+        std::cout << std::endl;
     }
-    std:: cout << "]\n";
-}
-
-void printRoutes(const std::vector<Route*>& vector) {
-    std:: cout << "[";
-    for (std::vector<Route*>::const_iterator it = vector.begin(); it != vector.end(); ++it) {
-        std::cout << (*it)->getRouteName();
-    }
-    std:: cout << "]\n";
-}
-
-void printStops(const std::vector<Stop*>& vector) {
-    std:: cout << "[";
-    for (std::vector<Stop*>::const_iterator it = vector.begin(); it != vector.end(); ++it) {
-        std::cout << (*it)->getStopName();
-    }
-    std:: cout << "]\n";
-}
-
-Route* routeBinarySearch(std::string& name, std::vector<Route*>::const_iterator start, std::vector<Route*>::const_iterator end) {
-    if (start >= end)
-        return nullptr;
-
-    std::vector<Route*>::const_iterator middle = start + (end - start) / 2;
-
-    if ((*middle)->getRouteName() == name) {
-        return *middle;
-    } else if ((*middle)->getRouteName() < name) {
-        return routeBinarySearch(name, middle + 1, end);
-    } else {
-        return routeBinarySearch(name, start, middle);
-    }
-}
-
-Route* routeBinarySearch(std::string& name) {
-    return routeBinarySearch(name, registeredRoutes.begin(), registeredRoutes.end());
 }
 
 template <typename T>
-void binaryInsert(std::vector<T*>& vec, T* newItem, std::function<bool(T*, T*)> comparator) {
-    typename std::vector<T*>::iterator it = std::lower_bound(vec.begin(), vec.end(), newItem, comparator);
+T* binarySearch(const std::string& name, typename std::vector<T*>::const_iterator start, typename std::vector<T*>::const_iterator end) {
+    if (start >= end)
+        return nullptr;
+
+    typename std::vector<T*>::const_iterator middle = start + (end - start) / 2;
+
+    if (**middle == name) {
+        return *middle;
+    } else if (**middle < name) {
+        return binarySearch<T>(name, middle + 1, end);
+    } else {
+        return binarySearch<T>(name, start, middle);
+    }
+}
+
+Bus* busBinarySearch(const std::string& name) {
+    return binarySearch<Bus>(name, registeredBuses.cbegin(), registeredBuses.cend());
+}
+
+Route* routeBinarySearch(const std::string& name) {
+    return binarySearch<Route>(name, registeredRoutes.cbegin(), registeredRoutes.cend());
+}
+
+Stop* stopBinarySearch(const std::string& name) {
+    return binarySearch<Stop>(name, registeredStops.cbegin(), registeredStops.cend());
+}
+
+template <typename T>
+void binaryInsert(std::vector<T*>& vec, T* newItem) {
+    typename std::vector<T*>::iterator it = std::lower_bound(vec.begin(), vec.end(), newItem, [](T* a, T* b) { return *a < *b; });
     vec.insert(it, newItem);
 }
 
+void busBinaryInsert(Bus* bus) {
+    binaryInsert(registeredBuses, bus);
+}
+
+void routeBinaryInsert(Route* route) {
+    binaryInsert(registeredRoutes, route);
+}
+
+void stopBinaryInsert(Stop* stop) {
+    binaryInsert(registeredStops, stop);
+}
+
+template <typename T>
+T* getValid(typename std::vector<T*>& registry, bool spaceless) {
+    std::cout << "Registry:" << std::endl;
+    printVector(registry);
+
+    std::string search = spaceless ? getSpacelessString() : getNonEmptyString();
+    T* item = binarySearch<T>(search, registry.cbegin(), registry.cend());
+    while (item == nullptr) {
+        std::cout << "Please enter a name:" << std::endl;
+        search = spaceless ? getSpacelessString() : getNonEmptyString();
+        item = binarySearch<T>(search, registry.cbegin(), registry.cend());
+    }
+
+    return item;
+}
+
+Bus* getValidBus() {
+    return getValid<Bus>(registeredBuses, true);
+}
+
+Route* getValidRoute() {
+    return getValid<Route>(registeredRoutes, true);
+}
+
+Stop* getValidStop() {
+    return getValid<Stop>(registeredStops, false);
+}
+
 void addBus() {
+    if (registeredRoutes.size() == 0) {
+        std::cout << "There must be at least one route before you can register a new bus!" << std::endl;
+        return;
+    }
+
     // str vin, str type, int cap, int pas, int busNum, int currStop, Route* route
-    std:: cout << "Enter a bus vin:\n";
-    std::string vin;
-    std::cin >> vin;
+    std:: cout << "Enter a bus vin:" << std::endl;
+    std::string vin = getSpacelessString();
+    while (busBinarySearch(vin) != nullptr) {
+        std::cout << "A bus with this vin is already registered! Please try again." << std::endl;
+        vin = getSpacelessString();
+    }
 
     // Should there be an input for vehicle type??? Wouldn't all buses have the same type? City bus?
     std::string vehicleType = "City bus";
 
-    std::cout << "Enter bus capacity:\n";
-    int capacity;
-    while (!(std::cin >> capacity)) {
-        std::cout << "Enter bus capacity:\n";
-    }
+    std::cout << "Enter bus capacity:" << std::endl;
+    int capacity = getValidInt();
 
     int passengers = 0;
 
-    std::cout << "Enter a bus number:\n";
-    int busNumber;
-    while (!(std::cin >> busNumber)) {
-        std::cout << "Enter a bus number:\n";
-    }
+    std::cout << "Enter a bus number:" << std::endl;
+    int busNumber = getValidInt();
 
     int currentStop = 0;
 
-    std::cout << "Enter the route this bus should take:\n";
-    std::string routeName;
-    getline(std::cin, routeName);
-    Route* route = routeBinarySearch(routeName);
+    std::cout << "Enter the route this bus takes:" << std::endl;
+    Route* route = getValidRoute();
 
-    Bus* bus = new Bus(vin, vehicleType, capacity, passengers, busNumber, currentStop, route);
-    binaryInsert(registeredBuses, bus,
-        std::function<bool(Bus*, Bus*)>([](Bus* a, Bus* b) -> bool {
-            return a->getBusNumber() < b->getBusNumber();
-        }));
+    busBinaryInsert(new Bus(vin, vehicleType, capacity, passengers, busNumber, currentStop, route));
 }
 
 void addRoute() {
-    // str name
+    std::cout << "Enter the name of the route you want to create:" << std::endl;
+    std::string routeName = getSpacelessString();
+    while (routeBinarySearch(routeName) != nullptr) {
+        std::cout << "A route with this name is already registered! Please try again." << std::endl;
+        routeName = getSpacelessString();
+    }
+
+    routeBinaryInsert(new Route(routeName));
+}
+
+void addStop() {
+    std::cout << "Enter the name of the stop you want to register:" << std::endl;
+    std::string stopName = getNonEmptyString();
+    while (stopBinarySearch(stopName) != nullptr) {
+        std::cout << "A stop with this name is already registered! Please try again." << std::endl;
+        stopName = getNonEmptyString();
+    }
+
+    stopBinaryInsert(new Stop(stopName));
+}
+
+void printRouteStops() {
+    if (registeredRoutes.size() == 0) {
+        std::cout << "There are currently no registered routes!" << std::endl;
+        return;
+    }
+
+    std::cout << "Enter a route name:" << std::endl;
+    Route* route = getValidRoute();
+
+    route->printRouteForward();
+}
+
+template <typename T>
+void deleteItem(std::vector<T*>& registry, T* item) {
+    typename std::vector<T*>::iterator it = std::find(registry.begin(), registry.end(), item);
+    if (it != registry.end()) {
+        registry.erase(it);
+        delete item;
+    }
+}
+
+void removeBus() {
+    deleteItem(registeredBuses, getValidBus());
+}
+
+void removeRoute() {
+    Route* route = getValidRoute();
+    
+    registeredBuses.erase( // ???
+        std::remove_if(
+            registeredBuses.begin(),
+            registeredBuses.end(),
+            [route](Bus* bus) {
+                if (bus->getRoute() == route) {
+                    delete bus;
+                    return true;
+                }
+                return false;
+            }
+        ),
+        registeredBuses.end()
+    );
+
+    deleteItem(registeredRoutes, route);
+}
+
+void removeStop() {
+    Stop* stop = getValidStop();
+
+    for (std::vector<Route*>::iterator it = registeredRoutes.begin(); it < registeredRoutes.end(); ++it) {
+        if ((*it)->stopExist(stop->getStopName())) {
+            (*it)->removeStop(stop->getStopName());
+        }
+    }
+
+    deleteItem(registeredStops, stop);
+}
+
+void prependStopToRoute() {
+    std::cout << "Enter the name of the route you'd like to modify:" << std::endl;
+    Route* route = getValidRoute();
+
+    std::cout << "Enter the name of the stop you'd like to prepend to this route:" << std::endl;
+    Stop* stop = getValidStop();
+
+    route->addStopToFront(stop);
+}
+
+void appendStopToRoute() {
+    std::cout << "Enter the name of the route you'd like to modify:" << std::endl;
+    Route* route = getValidRoute();
+
+    std::cout << "Enter the name of the stop you'd like to append to this route:" << std::endl;
+    Stop* stop = getValidStop();
+
+    route->addStopToBack(stop);
+}
+
+void addStopBeforeToRoute() {
+    std::cout << "Enter the name of the route you'd like to modify:" << std::endl;
+    Route* route = getValidRoute();
+
+    std::cout << "Enter the name of the stop you'd like to insert to this route:" << std::endl;
+    Stop* stop = getValidStop();
+
+    std::cout << "Enter the name of the stop you'd like to insert the new stop behind in this route:" << std::endl;
+    Stop* before = getValidStop();
+
+    route->addStopBefore(stop, before->getStopName());
+}
+
+void addStopAfterToRoute() {
+    std::cout << "Enter the name of the route you'd like to modify:" << std::endl;
+    Route* route = getValidRoute();
+
+    std::cout << "Enter the name of the stop you'd like to insert to this route:" << std::endl;
+    Stop* stop = getValidStop();
+
+    std::cout << "Enter the name of the stop you'd like to insert the new stop ahead of in this route:" << std::endl;
+    Stop* before = getValidStop();
+
+    route->addStopAfter(stop, before->getStopName());
+}
+
+void removeStopFromRoute() {
+    std::cout << "Enter the name of the route you'd like to modify:" << std::endl;
+    Route* route = getValidRoute();
+
+    std::cout << "Enter the name of the stop you'd like to remove from this route:" << std::endl;
+    Stop* stop = getValidStop();
+
+    route->removeStop(stop->getStopName());
+}
+
+void loadDefaultManager() {
+    Stop* s1 = new Stop("Daly City");
+    Stop* s2 = new Stop("Sunnyvale");
+    Stop* s3 = new Stop("San Jose");
+    Stop* s4 = new Stop("Burlingame");
+    Stop* s5 = new Stop("Millbrae");
+    Stop* s6 = new Stop("Cupertino");
+    Stop* s7 = new Stop("South San Fransico");
+    Stop* s8 = new Stop("San Bruno");
+    Stop* s9 = new Stop("Richmond");
+
+    stopBinaryInsert(s1);
+    stopBinaryInsert(s2);
+    stopBinaryInsert(s3);
+    stopBinaryInsert(s4);
+    stopBinaryInsert(s5);
+    stopBinaryInsert(s6);
+    stopBinaryInsert(s7);
+    stopBinaryInsert(s8);
+    stopBinaryInsert(s9);
+
+    Route* r1 = new Route("Route#1");
+    r1->addStopToBack(s2);
+    r1->addStopToBack(s8);
+    r1->addStopToBack(s5);
+    r1->addStopToBack(s9);
+    Route* r2 = new Route("Route#2");
+    r2->addStopToBack(s6);
+    r2->addStopToBack(s8);
+    r2->addStopToBack(s4);
+    r2->addStopToBack(s7);
+    r2->addStopToBack(s3);
+    r2->addStopToBack(s1);
+    Route* r3 = new Route("Route#3");
+    r3->addStopToBack(s2);
+    r3->addStopToBack(s5);
+    Route* r4 = new Route("Route#4");
+    r4->addStopToBack(s4);
+    r4->addStopToBack(s3);
+    r4->addStopToBack(s9);
+
+    routeBinaryInsert(r1);
+    routeBinaryInsert(r2);
+    routeBinaryInsert(r3);
+    routeBinaryInsert(r4);
+
+    Bus* b1 = new Bus("VIN123", "City Bus", 30, 0, 30, 0, r2);
+    Bus* b2 = new Bus("VIN132", "City Bus", 30, 0, 29, 0, r3);
+    Bus* b3 = new Bus("VIN213", "City Bus", 30, 0, 151, 0, r2);
+    Bus* b4 = new Bus("VIN231", "City Bus", 30, 0, 59, 0, r1);
+    Bus* b5 = new Bus("VIN312", "City Bus", 30, 0, 83, 0, r3);
+    Bus* b6 = new Bus("VIN321", "City Bus", 30, 0, 121, 0, r4);
+
+    busBinaryInsert(b1);
+    busBinaryInsert(b2);
+    busBinaryInsert(b3);
+    busBinaryInsert(b4);
+    busBinaryInsert(b5);
+    busBinaryInsert(b6);
 }
 
 void beginPromptLoop() {
-    std::cout << "\nTransitManager started!\n";
+    loadDefaultManager();
+
+    std::cout << "\nTransitManager started!" << std::endl;
 
     for (int userAction = getUserAction(); userAction != QUIT; userAction = getUserAction()) {
         switch (userAction) {
             case PRINT_BUSES:
-                printBuses(registeredBuses);
+                std::cout << "Registered buses:" << std::endl;
+                printVector(registeredBuses);
                 break;
             case PRINT_ROUTES:
-                printRoutes(registeredRoutes);
+                std::cout << "Registered routes:" << std::endl;
+                printVector(registeredRoutes);
+                break;
+            case PRINT_STOPS:
+                std::cout << "Registered stops:" << std::endl;
+                printVector(registeredStops);
                 break;
             case PRINT_STOPS_IN_ROUTE:
-                std::cout << "FINISH ME!\n";
+                printRouteStops();
                 break;
             case ADD_BUS:
                 addBus();
                 break;
             case ADD_ROUTE:
-            case ADD_STOP_TO_ROUTE:
-                std::cout << "Not implemented yet!\n";
+                addRoute();
+                break;
+            case ADD_STOP:
+                addStop();
+                break;
+            case REMOVE_BUS:
+                removeBus();
+                break;
+            case REMOVE_ROUTE:
+                removeRoute();
+                break;
+            case REMOVE_STOP:
+                removeStop();
+                break;
+            case ADD_ROUTE_STOP_BEGIN:
+                prependStopToRoute();
+                break;
+            case ADD_ROUTE_STOP_END:
+                appendStopToRoute();
+                break;
+            case ADD_ROUTE_STOP_BEFORE:
+                addStopBeforeToRoute();
+                break;
+            case ADD_ROUTE_STOP_AFTER:
+                addStopAfterToRoute();
+                break;
+            case REMOVE_ROUTE_STOP:
+                removeStopFromRoute();
+                break;
+            case SAVE_REG:
+                break;
+            case LOAD_REG:
+                break;
+            case BEGIN_SIM:
                 break;
             default:
-                std::cout << "Unknown action!\n";
+                std::cout << "Unknown action!" << std::endl;
                 break;
         }
+
+        std::cout << std::endl;
     }
 
-    std::cout << "The transit manager has been quit! Goodbye!\n";
+    std::cout << "The transit manager has been quit! Goodbye!" << std::endl;
 }
 

@@ -12,10 +12,10 @@ int main()
     // Create Route and Stops
     Route route("City Loop");
 
-    Stop *central = new Stop("Central Station", nullptr, nullptr, 5);
-    Stop *park = new Stop("Park Avenue", nullptr, nullptr, 3);
-    Stop *downtown = new Stop("Downtown", nullptr, nullptr, 4);
-    Stop *uptown = new Stop("Uptown", nullptr, nullptr, 6);
+    Stop *central = new Stop("Central Station");
+    Stop *park = new Stop("Park Avenue");
+    Stop *downtown = new Stop("Downtown");
+    Stop *uptown = new Stop("Uptown");
 
     route.addStopToBack(central);
     route.addStopToBack(park);
