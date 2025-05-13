@@ -87,6 +87,11 @@ bool Bus::removePassenger(Passenger* passenger)
     return false;
 }
 
+int Bus::getCapacity() const {
+    return this->getTotalCapacity();
+}
+
+
 std::ostream& operator<<(std::ostream& strm, const Bus& bus) {
     strm << "Bus(VIN:" << bus.getVin() << ", NUM:" << bus.getBusNumber() << ", CAP:" << bus.getTotalCapacity() << ", ROUT:" << bus.getRoute()->getRouteName() << ")";
     return strm;

@@ -11,4 +11,11 @@ add_executable(busTransit main.cpp
         Stop.cpp
         Stop.h
         Route.cpp
-        Route.h)
+        Route.h
+        Passenger.cpp
+        Passenger.h
+        StopNode.cpp
+        StopNode.h
+        TransitManager.cpp
+        TransitManager.h
+)

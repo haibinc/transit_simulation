@@ -16,6 +16,7 @@ g++ -fdiagnostics-color=always -g C:/Users/misha/Documents/GitHub/transit_simula
 #include <limits>
 #include <functional>
 #include <sstream>
+#include <fstream>
 #include <random>
 #include <array>
 #include <unordered_map>
@@ -409,136 +410,103 @@ void removeStopFromRoute() {
     route->removeStop(stop->getStopName());
 }
 
-void loadDefaultRegistry() {
+void saveRegistry(const std::string& filename) {
+    std::ofstream file(filename);
+    if (!file) {
+        std::cerr << "Error opening file for writing." << std::endl;
+        return;
+    }
+
+    // Save stops
+    file << "STOPS\n";
+    for (Stop* stop : registeredStops) {
+        file << stop->getStopName() << '\n';
+    }
+
+    // Save routes
+    file << "\nROUTES\n";
+    for (Route* route : registeredRoutes) {
+        file << route->getRouteName() << ':';
+        StopNode* node = route->getHead();
+        while (node) {
+            file << node->getStop()->getStopName();
+            node = node->getNextStopNode();
+            if (node) file << ',';
+        }
+        file << '\n';
+    }
+
+    // Save buses
+    file << "\nBUSES\n";
+    for (Bus* bus : registeredBuses) {
+        file << bus->getVin() << ',' << bus->getVehicleType() << ',' << bus->getCapacity() << ',' << bus->getPassengerCount()
+             << ',' << bus->getBusNumber() << ',' << bus->getCurrentStop() << ',' << bus->getRoute()->getRouteName() << '\n';
+    }
+
+    file.close();
+    std::cout << "Saved successfully to " << filename << std::endl;
+}
+
+
+void loadRegistry(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Error opening file for reading." << std::endl;
+        return;
+    }
+
     deleteVector(registeredBuses);
     deleteVector(registeredRoutes);
     deleteVector(registeredStops);
 
-    Stop* s1 = new Stop("Daly City");
-    Stop* s2 = new Stop("Sunnyvale");
-    Stop* s3 = new Stop("San Jose");
-    Stop* s4 = new Stop("Burlingame");
-    Stop* s5 = new Stop("Millbrae");
-    Stop* s6 = new Stop("Cupertino");
-    Stop* s7 = new Stop("South San Fransico");
-    Stop* s8 = new Stop("San Bruno");
-    Stop* s9 = new Stop("Richmond");
+    std::string line, section;
+    while (std::getline(file, line)) {
+        if (line.empty()) continue;
 
-    stopBinaryInsert(s1);
-    stopBinaryInsert(s2);
-    stopBinaryInsert(s3);
-    stopBinaryInsert(s4);
-    stopBinaryInsert(s5);
-    stopBinaryInsert(s6);
-    stopBinaryInsert(s7);
-    stopBinaryInsert(s8);
-    stopBinaryInsert(s9);
+        if (line == "STOPS" || line == "ROUTES" || line == "BUSES") {
+            section = line;
+            continue;
+        }
 
-    Route* r1 = new Route("Route#1");
-    r1->addStopToBack(s2);
-    r1->addStopToBack(s8);
-    r1->addStopToBack(s5);
-    r1->addStopToBack(s9);
-    Route* r2 = new Route("Route#2");
-    r2->addStopToBack(s6);
-    r2->addStopToBack(s8);
-    r2->addStopToBack(s4);
-    r2->addStopToBack(s7);
-    r2->addStopToBack(s3);
-    r2->addStopToBack(s1);
-    Route* r3 = new Route("Route#3");
-    r3->addStopToBack(s2);
-    r3->addStopToBack(s5);
-    Route* r4 = new Route("Route#4");
-    r4->addStopToBack(s4);
-    r4->addStopToBack(s3);
-    r4->addStopToBack(s9);
+        if (section == "STOPS") {
+            stopBinaryInsert(new Stop(line));
+        } else if (section == "ROUTES") {
+            auto colon = line.find(':');
+            std::string routeName = line.substr(0, colon);
+            auto* route = new Route(routeName);
+            std::string stopsLine = line.substr(colon + 1);
+            std::stringstream ss(stopsLine);
+            std::string stopName;
+            while (std::getline(ss, stopName, ',')) {
+                Stop* stop = stopBinarySearch(stopName);
+                if (stop) route->addStopToBack(stop);
+            }
+            routeBinaryInsert(route);
+        } else if (section == "BUSES") {
+            std::stringstream ss(line);
+            std::string vin, type, routeName;
+            int cap, pas, num, currStop;
+            std::getline(ss, vin, ',');
+            std::getline(ss, type, ',');
+            ss >> cap;
+            ss.ignore();
+            ss >> pas;
+            ss.ignore();
+            ss >> num;
+            ss.ignore();
+            ss >> currStop;
+            ss.ignore();
+            std::getline(ss, routeName);
 
-    routeBinaryInsert(r1);
-    routeBinaryInsert(r2);
-    routeBinaryInsert(r3);
-    routeBinaryInsert(r4);
-
-    Bus* b1 = new Bus("VIN123", "City Bus", 30, 0, 30, 0, r2);
-    Bus* b2 = new Bus("VIN132", "City Bus", 30, 0, 29, 0, r3);
-    Bus* b3 = new Bus("VIN213", "City Bus", 30, 0, 30, 0, r2);
-    Bus* b4 = new Bus("VIN231", "City Bus", 30, 0, 59, 0, r1);
-    Bus* b5 = new Bus("VIN312", "City Bus", 30, 0, 29, 0, r3);
-    Bus* b6 = new Bus("VIN321", "City Bus", 30, 0, 121, 0, r4);
-
-    busBinaryInsert(b1);
-    busBinaryInsert(b2);
-    busBinaryInsert(b3);
-    busBinaryInsert(b4);
-    busBinaryInsert(b5);
-    busBinaryInsert(b6);
-}
-
-void loadRegistry1() {
-    deleteVector(registeredBuses);
-    deleteVector(registeredRoutes);
-    deleteVector(registeredStops);
-
-    Stop* s1 = new Stop("Kitchen");
-    Stop* s2 = new Stop("Living Room");
-    Stop* s3 = new Stop("Bathroom");
-    Stop* s4 = new Stop("Bedroom");
-    Stop* s5 = new Stop("Guest Room");
-    Stop* s6 = new Stop("Dining room");
-
-    stopBinaryInsert(s1);
-    stopBinaryInsert(s2);
-    stopBinaryInsert(s3);
-    stopBinaryInsert(s4);
-    stopBinaryInsert(s5);
-    stopBinaryInsert(s6);
-
-    Route* r1 = new Route("Route#1");
-    r1->addStopToBack(s2);
-    r1->addStopToBack(s5);
-    Route* r2 = new Route("Route#2");
-    r2->addStopToBack(s6);
-    r2->addStopToBack(s4);
-    r2->addStopToBack(s3);
-    r2->addStopToBack(s1);
-    Route* r3 = new Route("Route#3");
-    r3->addStopToBack(s4);
-    r3->addStopToBack(s3);
-
-    routeBinaryInsert(r1);
-    routeBinaryInsert(r2);
-    routeBinaryInsert(r3);
-
-    Bus* b1 = new Bus("VIN123", "RC Bus", 2, 0, 30, 0, r2);
-    Bus* b2 = new Bus("VIN132", "RC Bus", 2, 0, 29, 0, r3);
-    Bus* b3 = new Bus("VIN213", "RC Bus", 2, 0, 30, 0, r2);
-    Bus* b4 = new Bus("VIN231", "RC Bus", 2, 0, 59, 0, r1);
-    Bus* b5 = new Bus("VIN312", "RC Bus", 2, 0, 29, 0, r3);
-
-    busBinaryInsert(b1);
-    busBinaryInsert(b2);
-    busBinaryInsert(b3);
-    busBinaryInsert(b4);
-    busBinaryInsert(b5);
-}
-
-void loadReg() {
-    std:: cout << "Enter a number corresponding to a registry (0-1):" << std::endl;
-    int input = getValidInt();
-    while (input < 0 || input > 1) {
-        std::cout << "Enter a number in the range 0-1! Please try again." << std::endl;
-        input = getValidInt();
+            Route* route = routeBinarySearch(routeName);
+            if (route) {
+                busBinaryInsert(new Bus(vin, type, cap, pas, num, currStop, route));
+            }
+        }
     }
 
-    if (input == 0) {
-        std:: cout << "Loading registry 0..." << std::endl;
-        loadDefaultRegistry();
-        std:: cout << "Done!" << std::endl;
-    } else if (input == 1) {
-        std:: cout << "Loading registry 1..." << std::endl;
-        loadRegistry1();
-        std:: cout << "Done!" << std::endl;
-    }
+    file.close();
+    std::cout << "Loaded successfully from " << filename << std::endl;
 }
 
 void startSimulation() {
@@ -606,8 +574,7 @@ void startSimulation() {
 }
 
 void beginPromptLoop() {
-    loadDefaultRegistry();
-    loadRegistry1();
+
 
     std::cout << "\nTransitManager started!" << std::endl;
 
@@ -661,12 +628,17 @@ void beginPromptLoop() {
             case REMOVE_ROUTE_STOP:
                 removeStopFromRoute();
                 break;
-            case SAVE_REG:
-                std::cout << "WIP!" << std::endl;
-                break;
-            case LOAD_REG:
-                loadReg();
-                break;
+            case SAVE_REG: {
+                std::cout << "Enter filename to save to:" << std::endl;
+                saveRegistry(getNonEmptyString());
+            }
+            break;
+            case LOAD_REG: {
+                std::cout << "Enter filename to load from:" << std::endl;
+                loadRegistry(getNonEmptyString());
+            }
+            break;
+
             case BEGIN_SIM:
                 startSimulation();
                 break;

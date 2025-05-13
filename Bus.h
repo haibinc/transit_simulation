@@ -32,6 +32,7 @@ public:
     void move() override;
     int getBusNumber() const;
     int getCurrentStop() const;
+    int getCapacity() const;
     Route* getRoute() const;
     void reportStop() const;
 

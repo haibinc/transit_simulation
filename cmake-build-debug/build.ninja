@@ -79,6 +79,24 @@ build CMakeFiles/busTransit.dir/Route.cpp.obj: CXX_COMPILER__busTransit_unscanne
   OBJECT_DIR = CMakeFiles\busTransit.dir
   OBJECT_FILE_DIR = CMakeFiles\busTransit.dir
 
+build CMakeFiles/busTransit.dir/Passenger.cpp.obj: CXX_COMPILER__busTransit_unscanned_Debug C$:/Users/haibi/CLionProjects/busTransit/Passenger.cpp || cmake_object_order_depends_target_busTransit
+  DEP_FILE = CMakeFiles\busTransit.dir\Passenger.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\busTransit.dir
+  OBJECT_FILE_DIR = CMakeFiles\busTransit.dir
+
+build CMakeFiles/busTransit.dir/StopNode.cpp.obj: CXX_COMPILER__busTransit_unscanned_Debug C$:/Users/haibi/CLionProjects/busTransit/StopNode.cpp || cmake_object_order_depends_target_busTransit
+  DEP_FILE = CMakeFiles\busTransit.dir\StopNode.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\busTransit.dir
+  OBJECT_FILE_DIR = CMakeFiles\busTransit.dir
+
+build CMakeFiles/busTransit.dir/TransitManager.cpp.obj: CXX_COMPILER__busTransit_unscanned_Debug C$:/Users/haibi/CLionProjects/busTransit/TransitManager.cpp || cmake_object_order_depends_target_busTransit
+  DEP_FILE = CMakeFiles\busTransit.dir\TransitManager.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\busTransit.dir
+  OBJECT_FILE_DIR = CMakeFiles\busTransit.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target busTransit
@@ -87,7 +105,7 @@ build CMakeFiles/busTransit.dir/Route.cpp.obj: CXX_COMPILER__busTransit_unscanne
 #############################################
 # Link the executable busTransit.exe
 
-build busTransit.exe: CXX_EXECUTABLE_LINKER__busTransit_Debug CMakeFiles/busTransit.dir/main.cpp.obj CMakeFiles/busTransit.dir/Vehicle.cpp.obj CMakeFiles/busTransit.dir/Bus.cpp.obj CMakeFiles/busTransit.dir/Stop.cpp.obj CMakeFiles/busTransit.dir/Route.cpp.obj
+build busTransit.exe: CXX_EXECUTABLE_LINKER__busTransit_Debug CMakeFiles/busTransit.dir/main.cpp.obj CMakeFiles/busTransit.dir/Vehicle.cpp.obj CMakeFiles/busTransit.dir/Bus.cpp.obj CMakeFiles/busTransit.dir/Stop.cpp.obj CMakeFiles/busTransit.dir/Route.cpp.obj CMakeFiles/busTransit.dir/Passenger.cpp.obj CMakeFiles/busTransit.dir/StopNode.cpp.obj CMakeFiles/busTransit.dir/TransitManager.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\busTransit.dir
